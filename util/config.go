@@ -9,6 +9,7 @@ import (
 type Config struct {
     Endpoint string
     Token string
+    Username string
 }
 
 var config *Config = nil

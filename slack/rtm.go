@@ -1,26 +1,35 @@
-package main
+package slack
 
 import (
-    "fmt"
-    "log"
-    //"io/ioutil"
     "encoding/json"
-    "net/http"
-    "github.com/censhin/alby-bot/util"
+    "log"
+
+    "golang.org/x/net/websocket"
 )
 
-var config *util.Config = util.GetConfig()
-
-func main() {
-    url := config.Endpoint + "/api.test?token=" + config.Token
-    resp, err := http.Get(url)
-    if err != nil {
-        log.Panic("hepl")
-    }
-    defer resp.Body.Close()
-    body, err := json.Marshal(resp.Body)
-    if err != nil {
-        log.Panic("halp")
-    }
-    fmt.Println(body)
+func RtmStart() ([]byte, error) {
+    uri := config.Endpoint + "/rtm.start?token=" + config.Token
+    resp, err := Get(uri)
+    return resp, err
 }
+
+func RtmConnect() (*websocket.Conn, error) {
+    uri, err := RtmStart()
+    if err != nil {
+        log.Panic("RtmStart failed")
+        return nil, err
+    }
+
+    b := make(map[string]interface{})
+    json.Unmarshal(uri, &b)
+    wsUrl := b["url"].(string)
+
+    wsConn, err := websocket.Dial(wsUrl, "", "http://localhost")
+    if err != nil {
+        log.Panic("Cannot connect to websocket\n")
+        return nil, err
+    } else {
+        return wsConn, nil
+    }
+}
+
