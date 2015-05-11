@@ -1,19 +1,21 @@
 package main
 
 import (
-    "net/http"
-
-    "github.com/censhin/alby-bot/handlers"
-    "github.com/censhin/alby-bot/slack"
+    "github.com/censhin/alby-bot/util"
+    "github.com/swenson/slacker"
 )
 
-func InitServer() {
-    slack.ChatPostMessage("#bot-testing", "NERDS")
-    slack.RtmConnect()
-    handlers.InitHandlers()
-    http.ListenAndServe(":8080", nil)
-}
+var config *util.Config = util.GetConfig()
 
 func main() {
-    InitServer()
+    bot, err := slacker.NewBot(config.Token)
+    if err != nil {
+        return
+    }
+
+    bot.RespondWith("nerds", func(user string, matchParts []string) string {
+        return "nerd"
+    })
+
+    select {}
 }
